@@ -1,4 +1,4 @@
-from __future__ import annotations
+from _future_ import annotations
 
 import json
 import os
@@ -25,7 +25,7 @@ from transformers import HubertModel
 
 from so_vits_svc_fork.hparams import HParams
 
-LOG = getLogger(__name__)
+LOG = getLogger(_name_)
 HUBERT_SAMPLING_RATE = 16000
 IS_COLAB = os.getenv("COLAB_RELEASE_TAG", False)
 
@@ -160,8 +160,8 @@ def ensure_pretrained_model(
 
 
 class HubertModelWithFinalProj(HubertModel):
-    def __init__(self, config):
-        super().__init__(config)
+    def _init_(self, config):
+        super()._init_(config)
 
         # The final projection layer is only used for backward compatibility.
         # Following https://github.com/auspicious3000/contentvec/issues/6
@@ -237,7 +237,7 @@ def get_content(
     return c
 
 
-def _substitute_if_same_shape(to_: dict[str, Any], from_: dict[str, Any]) -> None:
+def substitute_if_same_shape(to: dict[str, Any], from_: dict[str, Any]) -> None:
     not_in_to = list(filter(lambda x: x not in to_, from_.keys()))
     not_in_from = list(filter(lambda x: x not in from_, to_.keys()))
     if not_in_to:
@@ -257,7 +257,7 @@ def _substitute_if_same_shape(to_: dict[str, Any], from_: dict[str, Any]) -> Non
                 shape_missmatch.append((k, to_[k].shape, v.shape))
         elif isinstance(v, dict):
             assert isinstance(to_[k], dict)
-            _substitute_if_same_shape(to_[k], v)
+            substitute_if_same_shape(to[k], v)
         else:
             to_[k] = v
     if shape_missmatch:
@@ -400,10 +400,19 @@ def plot_spectrogram_to_numpy(spectrogram: ndarray) -> ndarray:
     plt.tight_layout()
 
     fig.canvas.draw()
-    data = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8, sep="")
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    width, height = fig.canvas.get_width_height()
+    data = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
+    
+    expected_size = width * height * 4 
+    
+    if data.size != expected_size:
+        raise ValueError(f"Expected {expected_size} bytes, but got {data.size} bytes.")
+    
+    data = data.reshape((height, width, 4)) 
+    rgb_data = data[..., :3] 
+    
     plt.close()
-    return data
+    return rgb_data
 
 
 def get_backup_hparams(
