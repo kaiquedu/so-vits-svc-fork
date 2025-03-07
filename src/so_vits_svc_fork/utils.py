@@ -25,7 +25,7 @@ from transformers import HubertModel
 
 from so_vits_svc_fork.hparams import HParams
 
-LOG = getLogger(_name_)
+LOG = getLogger(__name__)
 HUBERT_SAMPLING_RATE = 16000
 IS_COLAB = os.getenv("COLAB_RELEASE_TAG", False)
 
@@ -160,8 +160,8 @@ def ensure_pretrained_model(
 
 
 class HubertModelWithFinalProj(HubertModel):
-    def _init_(self, config):
-        super()._init_(config)
+    def __init__(self, config):
+        super().__init__(config)
 
         # The final projection layer is only used for backward compatibility.
         # Following https://github.com/auspicious3000/contentvec/issues/6
